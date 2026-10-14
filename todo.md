@@ -1,0 +1,13 @@
+- Wavelet Matrix
+- Stern-Brocot Tree
+- Arbitrary-Mod Binomial Coefficient
+- faster Mo's algorithm
+
+- poly, fps
+    - multieval (fast)
+    - interpolate (fast)
+    - compositional inverse
+    - fps sqrt
+    - 部分分数分解
+    - typical divide-and-conquer
+    - simd montgomery, simd ntt
