@@ -1,3 +1,7 @@
+// https://github.com/maspypy/library
+// https://github.com/NyaanNyaan/library
+// https://github.com/ei1333/library
+// https://github.com/stak2/cp-library
 #ifdef LOCAL
 #include "template.hpp"
 #else
