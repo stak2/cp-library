@@ -1,7 +1,7 @@
-- Wavelet Matrix
+- Factorial Mod Prime
 - Stern-Brocot Tree
 - Arbitrary-Mod Binomial Coefficient
-- faster Mo's algorithm
+- Rectangle/Point Add Rectangle Sum
 
 - poly, fps
     - multieval (fast)
