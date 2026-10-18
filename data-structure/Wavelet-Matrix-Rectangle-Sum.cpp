@@ -1,3 +1,4 @@
+#include <cstdio>
 struct BitVector {
     int blk;
     vector<u64> bit;
@@ -65,11 +66,21 @@ struct WaveletMatrixRectangleSum {
 
     // sum of w[i] s.t. i in [l,r) and v[i] in [0,u)
     S rect_sum(int l, int r, T u) const {
+        if (l == r or u <= T(0)) return S(0);
+        if (u >= (T(1) << H)) return ps[H][r] - ps[H][l];
         S ret = 0;
         for (int h = H-1; h >= 0; h--) {
             bool uh = u>>h&1;
-            if (uh) ret += ps[h][bs[h].rank(r,0)] - ps[h][bs[h].rank(l,0)];
-            tie(l, r) = descend(h, l, r, uh);
+            auto [l0, r0] = descend(h, l, r, 0);
+            if (uh) {
+                ret += ps[h][r0] - ps[h][l0];
+                l = l - l0 + mid[h];
+                r = r - r0 + mid[h];
+            }
+            else {
+                l = l0; r = r0;
+            }
+            if (l == r) break;
         }
         return ret;
     }
@@ -82,7 +93,7 @@ struct WaveletMatrixRectangleSum {
     template <typename F>
     tuple<T, int, S> max_right(int l, int r, F f) {
         S s_all = ps[H][r] - ps[H][l];
-        if (f(1<<H, r-l, s_all)) return {1<<H, r-l, s_all};
+        if (f(T(1)<<H, r-l, s_all)) return {T(1)<<H, r-l, s_all};
         T t = T(0);
         int cnt = 0;
         S s = S(0);
@@ -116,7 +127,7 @@ struct WaveletMatrixRectangleSum {
             int cnt_tmp = cnt + r1 - l1;
             S s_tmp = s + ps[h][r1] - ps[h][l1];
             T t_tmp = t - (T(1) << h);
-            if (f(t_tmp, cnt, s_tmp)) {
+            if (f(t_tmp, cnt_tmp, s_tmp)) {
                 t = t_tmp; cnt = cnt_tmp; s = s_tmp;
                 l = l0; r = r0;
             }
