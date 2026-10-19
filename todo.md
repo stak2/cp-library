@@ -1,4 +1,3 @@
-- Factorial Mod Prime
 - Stern-Brocot Tree
 - Arbitrary-Mod Binomial Coefficient
 - Rectangle/Point Add Rectangle Sum
