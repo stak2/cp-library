@@ -65,7 +65,7 @@ struct Polynomial : vector<mint> {
         return *this;
     }
 
-    poly operator*=(const poly &p) {
+    poly &operator*=(const poly &p) {
         if (this->empty() or p.empty()) {
             this->clear();
             return *this;
@@ -80,19 +80,27 @@ struct Polynomial : vector<mint> {
         return *this;
     }
 
-    poly operator/=(const poly &p) {
-        if (this->size() < p.size()) {
+    poly &operator/=(const poly &p) {
+        poly d(p);
+        d.shrink();
+        assert(!d.empty());
+        shrink();
+        if (this->size() < d.size()) {
             this->clear();
             return *this;
         }
-        size_t q_sz = this->size() - p.size() + 1;
-        return *this = (this->rev().pre(q_sz) * p.rev().inv(q_sz)).pre(q_sz).rev();
+        size_t q_sz = this->size() - d.size() + 1;
+        return *this = (this->rev().pre(q_sz) * d.rev().inv(q_sz)).pre(q_sz).rev();
     }
 
-    poly operator%=(const poly &p) {
-        *this -= (*this / p) * p;
+    poly &operator%=(const poly &p) {
+        poly d(p);
+        d.shrink();
+        assert(!d.empty());
+        *this -= (*this / d) * d;
         shrink();
         assert(this->size() < p.size());
+        assert(this->size() < d.size());
         return *this;
     }
 
@@ -138,6 +146,8 @@ struct Polynomial : vector<mint> {
     poly inv(int deg = -1) const {
         assert(!this->empty() and (*this)[0] != 0);
         if (deg == -1) deg = (int)this->size();
+        assert (deg >= 0);
+        if (deg == 0) return {};
         poly res(deg);
         res[0] = (*this)[0].inv();
         for (int d = 1; d < deg; d <<= 1) {
@@ -187,12 +197,16 @@ struct Polynomial : vector<mint> {
     poly log(int deg = -1) const {
         assert(!this->empty() and (*this)[0] == 1);
         if (deg == -1) deg = (int)this->size();
+        assert (deg >= 0);
+        if (deg == 0) return {};
         return (this->differentiate() * this->inv(deg)).pre(deg - 1).integrate();
     }
 
     poly exp(int deg = -1) const {
         assert(this->empty() or (*this)[0] == mint(0));
         if (deg == -1) deg = (int)this->size();
+        assert (deg >= 0);
+        if (deg == 0) return {};
 
         vector<mint> inv;
         inv.reserve(deg + 1);
@@ -267,6 +281,7 @@ struct Polynomial : vector<mint> {
     poly pow(long long k, int deg = -1) const {
         const int n = (int)this->size();
         if (deg == -1) deg = n;
+        assert(deg >= 0 and k >= 0);
         if (k == 0) {
             poly res(deg);
             if (deg > 0) res[0] = 1;
@@ -275,13 +290,14 @@ struct Polynomial : vector<mint> {
         int l = 0;
         while (l < n and (*this)[l] == 0){
             l++;
-            if (l >= (deg + k - 1) / k) return poly(deg, mint::raw(0));
+            if (l >= 1 + (deg - 1) / k) return poly(deg, mint::raw(0));
         }
         if (l == n) return poly(deg, mint::raw(0));
+        const int shift = k * l;
         mint rev = (*this)[l].inv();
-        poly res = (((*this * rev) >> l).log(deg) * k).exp(deg);
+        poly res = (((*this * rev) >> l).log(deg - shift) * k).exp(deg - shift);
         res *= (*this)[l].pow(k);
-        res = (res << (k * l)).pre(deg);
+        res = (res << shift).pre(deg);
         if ((int)res.size() < deg) res.resize(deg, mint::raw(0));
         return res;
     }
